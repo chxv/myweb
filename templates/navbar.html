@@ -1,0 +1,57 @@
+<!--导航栏-->
+
+<nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #3146cd" >
+
+    <a class="navbar-brand" href="{{ url_for('index.index') }}"><img src="/static/favicon.png" width="30" height="30"></a>
+
+    <!--折叠触发-->
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerArea" aria-controls="navbarTogglerArea" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!--目标折叠区域-->
+    <div class="collapse navbar-collapse" id="navbarTogglerArea">
+        <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+            {% if current_user.is_authenticated %}
+                <li class="nav-item active">
+                    <a class="nav-link" href="{{ url_for("u.home") }}">Home <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for("auth.logout") }}">Logout<span class="sr-only">(current)</span></a>
+                </li>
+            {% else %}
+                <li class="nav-item active">
+                    <a class="nav-link" href="{{ url_for("auth.login") }}">Login<span class="sr-only">(current)</span></a>
+                </li>
+            {% endif %}
+
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('index.explore') }}">Explore</a>
+            </li>
+{#            <li class="nav-item">#}
+{#                <a class="nav-link disabled" href="/disable">Disabled</a>#}
+{#            </li>#}
+        </ul>
+        <div class="form-inline my-2 my-lg-0">
+            <input class="form-control mr-sm-2" type="search" placeholder="Search" id="question">
+            <button class="btn btn-outline-warning my-2 my-sm-0" id="search_btn" onclick="to_search()">Search</button>
+        </div>
+    </div>
+
+</nav>
+
+<script type="text/javascript">
+                function to_search() {
+                    window.open("{{ url_for("index.search")}}?q=" + $('#question').val())
+            }
+</script>
+<script type="text/javascript">
+     $ (function(){
+         $('#question').bind('keypress',function(event){
+             if(event.keyCode == "13")
+             {
+                 to_search()
+             }
+         });
+     });
+</script>

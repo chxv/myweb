@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}{{ super() }} - explore{% endblock %}
+
+{% block head %}
+    {{ super() }}
+    <style>body{background-color: #f4ff89}</style>
+{% endblock %}
+
+{% block body %}
+    <div align="center">
+        <div style="height: 15em;"></div>
+        <a class="text-warning text-lg-center" href="{{ url_for('index.index') }} " style="font-size: 3em">
+            It's not present at present
+        </a>
+    </div>
+{% endblock %}

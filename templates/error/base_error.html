@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+
+
+{% block body %}
+    {{ super() }}
+    {% include "navbar.html" %}
+    <h1 class="text-danger text-center">{% block error_info %}{% endblock %}</h1>
+{% endblock %}

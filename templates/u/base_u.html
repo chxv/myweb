@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block head%}
+    {{ super() }}
+    <style>body{background-color: #cdb9a4}</style>
+{% endblock %}
+
+{% block body %}
+    {{ super() }}
+    {% include "navbar.html" %}  <!--添加导航栏-->
+{% endblock %}

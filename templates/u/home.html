@@ -1,0 +1,171 @@
+{% extends "u/base_u.html" %}
+
+{% block title %}{{ super() }} - {{ current_user.username }}{% endblock %}
+
+{% block head %}
+    {{ super() }}
+    <style>
+        .file {
+            padding: 4px 10px;
+            {#height: 40px;#}
+            {#line-height: 40px;#}
+            position: relative;
+            cursor: pointer;
+            color: #888;
+            background: #fafafa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            overflow: hidden;
+            display: inline-block;
+            *display: inline;
+            *zoom: 1;
+            margin-left: 2.3em;
+        }
+        .file input {
+            position: absolute;
+            font-size: 100px;
+            opacity: 0;
+            filter: alpha(opacity=0);
+            {#cursor: pointer#}
+         }
+        {#.file:hover {#}
+        {#    background: #AADFFD;#}
+        {#    border-color: #78C3F3;#}
+        {#    color: #004974;#}
+        {#    text-decoration: none;#}
+        {# }#}
+    </style>
+
+{% endblock %}
+
+{% block body %}
+    {{ super() }}
+
+    <!--upload-->
+    <div class="modal fade" id="uploadModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <!-- 模态框头部 -->
+                <div class="modal-header">
+                    <h4 class="modal-title text-info">upload</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <!-- 模态框主体 -->
+                <div class="modal-body">
+                    <div class="container">
+                    <form method="post" class="form-inline" enctype=multipart/form-data action="{{ url_for("u.home") }}">
+                        <ul><input type="text" class="form-control" placeholder="标题" name="title" required="required"></ul>
+                        <ul><input type="text" class="form-control" placeholder="简介" name="about" required="required"></ul>
+                        <ul><input type="text" class="form-control" placeholder="分类" name="classification" required="required"></ul>
+                        <ul></ul>
+                        <div class="form-inline">
+                            <span class="btn-outline-primary file">
+                                <input type="file" name=file id="fileUpload" value="value" accept=".md, .jpg, .jpeg, .png" required="required">
+                                <span id="showFileName">选择文件</span>  <!-- 展示文件名 -->
+                            </span>
+                            <input class="btn btn-outline-info" type=submit value=Upload style="margin-left: 3em">
+                        </div>
+                    </form>
+                    </div>
+                </div>
+                <!-- 模态框底部 -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" data-dismiss="modal">关闭</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+    <!--用户个人导航栏，头像，名称，-->
+    <div class="container" style="margin-top: 2em">
+        <div class="card text-white" style="background-color: #cdc6a6">
+            <div class="card-header">
+                <div class="row">
+                    <img src="/static/u/{{ info['userid'] }}/{{ info['head_portrait'] }}" style="height: 8em; width: 8em">
+
+                    <ul class="mr-auto">
+                        <h4 style="margin-top: 2em;margin-left: 1.5em">{{ info['username'] }}</h4>
+                    </ul>
+                    <div class="form-inline my-2 my-lg-0">
+                        <a data-toggle="modal" data-target="#uploadModal">
+                            <img src="/static/image/plus.png" style="height: 3em;width: 3em;margin-right: 1.5em">
+                        </a>
+
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">Start never late</div>
+        </div>
+    </div>
+
+    <!-- show all articles -->
+    <div id="show_all_articles">
+        {% for article in info['articles'] %}
+
+            <div class="container" style="margin-top: 2.5em" id="div_{{ article.id }}">
+	            <div class="card-header" style="background-color: #d7ff8d; color: #2c2425;">
+                    <div class="row" style="height: 50px;">
+                        <a class="mr-auto" href="{{ url_for('index.reading', article_id=article.id) }}"
+                            style="text-decoration: none">
+                            <ul class="mt-2 mt-lg-0">
+                            <h3 class="card-title">{{ article.title }}
+                                <span class="badge badge-info">{{ article.classification }}</span>
+                            </h3>
+                            </ul>
+                        </a>
+                        <div>
+                            <button type="button" class="btn btn-outline-danger my-2 my-sm-0"
+                                    data-target="#div_{{ article.id }}">
+                                <strong>X</strong>
+                            </button>
+                        </div>
+                    </div>
+	            </div>
+	            <div class="card-body" style="background-color: #93af7c; color: #2c2425;">
+                    <p class="text-default">{{ article.synopsis }}</p>  <!--简介-->
+                    <p align="right">{{ article.publish_time.year }}-{{ article.publish_time.month }}-{{ article.publish_time.day }}
+                        &nbsp;&nbsp;{{ article.publish_time.hour }}:{{ article.publish_time.minute }}
+                    </p>
+	            </div>
+            </div>
+
+        {% endfor %}
+    </div>
+
+<script>
+    {# 用来进行文件上传的一些验证处理及UI变化 #}
+    $(".file").on("change","input[type='file']",function(){
+        var filePath=$(this).val();
+        if(filePath.length < 3)  {# 未选择文件时 #}
+            $("#showFileName").text("选择文件");
+        else {
+            var arr = filePath.split('\\');
+            var fileName = arr[arr.length - 1];
+            $("#showFileName").text(" " + fileName + " ");
+        }
+    });
+
+    {# 删除文章 #}
+    $('#show_all_articles').delegate('button[data-target]', 'click', function() {
+        var target = $(this).data('target');
+        var article_id = target.slice(5); {# "#dev_" 即从第6位开始的为id #}
+        console.log("delete article");
+        console.log(article_id);
+        {# 发送get请求，删除文章 #}
+        $.get("{{ url_for('index.delete') }}", {'article': article_id},function(data,status){
+			console.log("返回数据: " + data + "\n状态: " + status);
+
+            {# 判断删除是否成功(不要将判断语句放在get函数外，除非能解决get函数异步执行的问题) #}
+            if (data === 'success' && status === 'success'){
+                $(target).fadeOut(2000)
+            }
+		});
+
+
+    })
+</script>
+
+{% endblock %}

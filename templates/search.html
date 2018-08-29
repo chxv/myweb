@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block title %}{{ super() }} - search{% endblock %}
+
+{% block body %}
+    {% include "navbar.html" %}
+    <h3 class="card-title">Sorry, now we can't search anything</h3>
+    <p class="text-info">question: <strong>{{ q }}</strong> </p>
+{% endblock %}

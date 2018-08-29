@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}{{ super() }} - {{ title }}{% endblock %}
+
+{% block head %}
+    {{ super() }}
+{% endblock %}
+
+{% block body %}
+    {% include "navbar.html" %}
+    <div class="container">
+        {{ content|safe }}
+    </div>
+
+
+    <script>
+        {# 给文档中的标签增加一些css #}
+        $(document).ready(function(){
+          $("table").addClass('table table-bordered')
+        });
+    </script>
+{% endblock %}
+
+
+
