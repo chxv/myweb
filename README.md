@@ -4,11 +4,21 @@
 
 #### Usage
 * 构建数据库
-> 进入项目执行:
+
+> 若项目文件夹名为App，进入项目执行: 
 ```shell
-    flask shell
+    $ pip install -r requirements.txt
+    $ flask shell
+    ...
+    >>> from App.db import db
+    >>> from App.operate_db import insert_data
+    >>> db.drop_all()
+    >>> db.create_all()
+    >>> insert_data(db)
+    >>> exit()
 ```
 > 进入shell后创建数据库，可适当插入数据。
+> 通过修改operate_db修改数据的角色与用户等信息
 
 * 运行
 > 执行以下代码
