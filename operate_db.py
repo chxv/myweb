@@ -4,6 +4,7 @@
 
 
 def insert_data(db):
+    '''insert some data for use'''
     from .models import User, Role, Article
     # 角色
     Anonymous_role = Role(name='Anonymous')  # 访客
@@ -16,7 +17,6 @@ def insert_data(db):
     Bob = User(username='Bob', role=Ordinary_role, password='123')
 
     # 文章
-    # Essay = Article(user=Tony, title='Test article', classification='Test')
 
     # 将记录添加到会话
     db.session.add(Admin_role)
