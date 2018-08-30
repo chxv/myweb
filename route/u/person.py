@@ -38,7 +38,7 @@ def home():
             new_essay = Article(userid=current_user.id, title=request.form['title'],
                                 synopsis=request.form['about'], classification=request.form['classification'],
                                 raw_filename=file.filename, file_name=filename)
-            from db import db
+            from ... import db
             db.session.add(new_essay)
             db.session.commit()
             return redirect(url_for('u.home'))

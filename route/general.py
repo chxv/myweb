@@ -46,7 +46,7 @@ def delete():
     if not essay:
         return "article not found"
     if current_user.id == essay.userid:  # 若文章作者id等于当前用户id
-        from db import db
+        from .. import db
         db.session.delete(essay)
         db.session.commit()
     return "success"
