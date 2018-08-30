@@ -64,7 +64,7 @@ def register():
 
 
 def register_user(new_user):
-    from db import db
+    from ... import db
     db.session.add(new_user)
     db.session.commit()
 
