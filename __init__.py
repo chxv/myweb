@@ -1,5 +1,5 @@
 from flask import Flask
-from db import db
+from .db import db
 from flask_login import LoginManager
 
 # 初始化数据库
