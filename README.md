@@ -8,7 +8,7 @@
 > 若项目文件夹名为App，进入项目执行: 
 ```shell
     $ pip install -r requirements.txt
-    $ flask shell
+    $ python -m flask shell
     ...
     >>> from App.db import db
     >>> from App.operate_db import insert_data
