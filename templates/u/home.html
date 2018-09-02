@@ -84,10 +84,10 @@
         <div class="card text-white" style="background-color: #cdc6a6">
             <div class="card-header">
                 <div class="row">
-                    <img src="/static/u/{{ info['userid'] }}/{{ info['head_portrait'] }}" style="height: 8em; width: 8em">
+                    <img src="/static/u/{{ info['user_id'] }}/{{ info['head_portrait'] }}" style="height: 8em; width: 8em">
 
                     <ul class="mr-auto">
-                        <h4 style="margin-top: 2em;margin-left: 1.5em">{{ info['username'] }}</h4>
+                        <h4 style="margin-top: 2em;margin-left: 1.5em">{{ info['nickname'] }}</h4>
                     </ul>
                     <div class="form-inline my-2 my-lg-0">
                         <a data-toggle="modal" data-target="#uploadModal">
@@ -97,7 +97,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-body">Start never late</div>
+            <div class="card-body">{{ info['signature'] }}</div>
         </div>
     </div>
 
@@ -116,11 +116,32 @@
                             </h3>
                             </ul>
                         </a>
+                        {# 文章右上部的功能选项 #}
                         <div>
+                            {# 文章公开性 #}
+                            <strong>share</strong>
+                            <a data-target="#div_{{ article.id }}" id="a_{{ article.id }}">
+                                <img id="off_img_{{ article.id }}" src="/static/image/off.png" width="60" height="30">
+                                <img id="on_img_{{ article.id }}" src="/static/image/on.png" width="60" height="30">
+                            </a>
+                            {% if article.secrecy == 'secret' %}
+                                <script>
+                                    $('#on_img_{{ article.id }}').hide();
+                                    $('#a_{{ article.id }}').attr('name', 'off');
+                                </script>
+                            {% elif article.secrecy == 'public' %}
+                                <script>
+                                    $('#off_img_{{ article.id }}').hide();
+                                    $('#a_{{ article.id }}').attr('name', 'on');
+                                </script>
+                            {% endif %}
+                            &nbsp;&nbsp;
+                            {# 删除文章 #}
                             <button type="button" class="btn btn-outline-danger my-2 my-sm-0"
                                     data-target="#div_{{ article.id }}">
                                 <strong>X</strong>
                             </button>
+
                         </div>
                     </div>
 	            </div>
@@ -152,19 +173,52 @@
     $('#show_all_articles').delegate('button[data-target]', 'click', function() {
         var target = $(this).data('target');
         var article_id = target.slice(5); {# "#dev_" 即从第6位开始的为id #}
-        console.log("delete article");
-        console.log(article_id);
+
         {# 发送get请求，删除文章 #}
         $.get("{{ url_for('index.delete') }}", {'article': article_id},function(data,status){
-			console.log("返回数据: " + data + "\n状态: " + status);
-
             {# 判断删除是否成功(不要将判断语句放在get函数外，除非能解决get函数异步执行的问题) #}
             if (data === 'success' && status === 'success'){
-                $(target).fadeOut(2000)
+                $(target).fadeOut(2000);
+                console.log("delete article");
+                console.log(article_id);
             }
 		});
+    });
+
+    {# 选择是否分享文章 #}
+    $('#show_all_articles').delegate('a[data-target]', 'click', function () {
+        var target = $(this).data('target');
+        var article_id = target.slice(5); {# "#dev_" 即从第6个字符开始的为id #}
+        var _a = $(this); {# 这里的this与下面函数内的this不同 #}
+        {# 切换 #}
+        if($(this).attr('name') === 'off'){
+            {# 开启文章分享 #}
+            $.post("{{ url_for("index.changeArticlePermission") }}",
+                { 'article_id': article_id, 'secrecy': 'public'},
+                function (data, status) {
+                    if (data === 'success' && status === 'success') {
+                        $('#off_img_' + article_id).hide();
+                        $('#on_img_' + article_id).fadeIn(500);
+                        $(_a).attr('name', 'on');
+                        console.log('article ' + article_id + ' set as public')
+                    }
+                });
+        }
+        else if($(this).attr('name') === 'on'){
+            {# 文章设为保密 #}
+            $.post("{{ url_for("index.changeArticlePermission") }}",
+                { 'article_id': article_id, 'secrecy': 'secret'},
+                function (data, status) {
+                    if (data === 'success' && status === 'success') {
+                        $('#on_img_' + article_id).hide();
+                        $('#off_img_' + article_id).fadeIn(500);
+                        $(_a).attr('name', 'off');
+                        console.log('article ' + article_id + ' set as secret')
+                    }
+                });
 
 
+        }
     })
 </script>
 

@@ -35,62 +35,71 @@ def explore():
 @mod.route('/d')
 @login_required
 def delete():
-    ''' 删除文章 '''
+    ''' 删除文章 [ 使用get ]'''
     article_id = request.args.get('article')
     # 未传入参数article
     if not article_id:
-        return "failed"
+        return "failed", 403
     from ..models import Article
     essay = Article.query.filter_by(id=article_id).first()  # 找到对应id的文章
     # 找不到对应文章
     if not essay:
-        return "article not found"
-    if current_user.id == essay.userid:  # 若文章作者id等于当前用户id
+        return "failed", 403
+    if current_user.id == essay.user_id:  # 若文章作者id等于当前用户id
         from .. import db
         db.session.delete(essay)
         db.session.commit()
     return "success"
 
 
-@mod.route('/article/<article_id>')
+@mod.route('/changeArticlePermission', methods=['POST'])
 @login_required
+def changeArticlePermission():
+    '''改变文章的状态 [ 使用post ]'''
+    from ..models import Article
+    from .. import db
+    # 检查http方法
+    if request.method == 'POST':
+        # 检查参数
+        if 'article_id' in request.form and 'secrecy' in request.form:
+            article_id, secrecy = request.form['article_id'], request.form['secrecy']
+            essay = Article.query.filter_by(id=article_id).first()
+            # 检查文章是否存在
+            if essay:
+                # 检查用户权限
+                if current_user.id == essay.user_id:
+                    essay.secrecy = secrecy
+                    db.session.commit()
+                    return 'success'
+    return 'Forbidden', 403
+
+
+def cannot_get_article():
+    '''当无法获取文章时:'''
+    flash('文章不存在或权限错误')
+    return redirect(url_for('index.index'))
+
+
+@mod.route('/article/<article_id>')
 def reading(article_id):
     from ..models import Article
+    from ..func import get_article
     essay = Article.query.filter_by(id=article_id).first()  # 找到对应id的文章
-    if not essay or current_user.id != essay.userid:
-        flash('文章不存在或权限错误')
-        return redirect(url_for('index.index'))
-    # 文件目录:  static/u/<userid>/filename
-    with open(f'static/u/{current_user.id}/{essay.file_name}', encoding='utf8') as f:
-        r = my_md2html(f.read())
-    return render_template('essay.html', content=r, title=essay.title)
+    # 文章不存在
+    if not essay:
+        return cannot_get_article()
+    # 文件目录:  static/u/<user_id>/filename
+    if essay.secrecy == 'secret':
+        if current_user.is_authenticated and (current_user.id == essay.user_id or current_user.role.name == 'Admin'):
+            return render_template('essay.html', content=get_article(essay), title=essay.title)
+        else:
+            # 权限错误
+            return cannot_get_article()
+    elif essay.secrecy == 'public':
+        return render_template('essay.html', content=get_article(essay), title=essay.title)
 
 
-def my_md2html(md):
-    import markdown
-    import bleach
 
-    allowed_tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code', 'em', 'i',
-                    'li', 'ol', 'pre', 'strong', 'ul', 'h1', 'h2', 'h3', 'h4', 'h5',
-                    'p', 'table', 'thead', 'tbody', 'td', 'tr', 'th', 'hr', 'img'
-                    ]
-    allowed_attrs = {'*': ['class', 'id', 'align'],
-                     'a': ['href'],
-                     'img': ['src', 'alt']}
-    # 初步生成html
-    t = markdown.markdown(md, output_format='html',
-                          extensions=[
-                              # 'urlize',
-                              'fenced_code',
-                              'codehilite(css_class=highlight)',
-                              'toc',
-                              'tables',
-                              'sane_lists',
-                          ])
-    # 净化html
-    html = bleach.linkify(bleach.clean(t, tags=allowed_tags, attributes=allowed_attrs, strip=True))
-
-    return html
 
 
 # @mod.before_request

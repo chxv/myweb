@@ -19,9 +19,13 @@ class User(db.Model, UserMixin):
     '''用户登录信息表'''
     __tablename__ = 'LoginUser'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    username = db.Column(db.String(20), unique=True)  # 用户名
+    username = db.Column(db.String(32), unique=True)  # 登录用户名
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))  # 角色
     password_hash = db.Column(db.String(128))  # 密码的hash
+
+    # 用户个人信息
+    nickname = db.Column(db.String(32), default='小白')  # 昵称
+    signature = db.Column(db.String(256))  # 个性签名
 
     articles = db.relationship('Article', backref='user', lazy='dynamic')  # 用户的文章
 
@@ -42,16 +46,23 @@ class User(db.Model, UserMixin):
 
 
 # 对于每篇文章采用一个单独的文件夹保存其 .md, .png, .jpg等，文章名即为文件名，文件夹为id
-# 文件夹位置：/static/u/<userid>/<articleID>/
+# 文件夹位置：/static/u/<user_id>/<articleID>/
 class Article(db.Model):
     '''用户的创作'''
     __tablename__ = 'Article'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)  # 文章id
-    userid = db.Column(db.Integer, db.ForeignKey('LoginUser.id'), nullable=False)  # 作者
-    title = db.Column(db.String(64))  # 文章标题/文章名
+    user_id = db.Column(db.Integer, db.ForeignKey('LoginUser.id'), nullable=False)  # 作者
+    title = db.Column(db.String(128))  # 文章标题/文章名
     synopsis = db.Column(db.String(1024))  # 文章简介
     publish_time = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)  # 文章创作日期
     classification = db.Column(db.String(32))  # 文章分类 -- 唯一型tag
+
+    # 文章保密级:
+    # secret(默认，仅自己可见)
+    # public(匿名可见)
+    # ... (未定义)
+    secrecy = db.Column(db.String(16), default='secret')
+
     # 储存
     raw_filename = db.Column(db.String(256))  # 文件上传前文件名
     file_name = db.Column(db.String(256))  # 系统储存文件名
