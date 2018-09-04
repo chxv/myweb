@@ -10,7 +10,8 @@ class Config:
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
         'sqlite:///' + os.path.join(base_dir, 'data.sqlite')  # 数据库位置
     SQLALCHEMY_TRACK_MODIFICATIONS = True  # 自动追踪修改（需要额外内存）
-    ALLOWED_EXTENSIONS = {'txt', 'md', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
+    ALLOWED_ARTICLE = {'txt', 'md'}  # a set
+    ALLOWED_IMAGE = {'png', 'jpg', 'jpeg', 'gif', 'icon'}
 
     @staticmethod
     def init_app(app):

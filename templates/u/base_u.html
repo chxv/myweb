@@ -2,10 +2,19 @@
 
 {% block head%}
     {{ super() }}
-    <style>body{background-color: #cdb9a4}</style>
+    <link href="/static/css/index.css" rel="stylesheet" type="text/css">
+    <style>
+        body{
+           	background: #ddffef;
+        }
+    </style>
 {% endblock %}
 
 {% block body %}
     {{ super() }}
     {% include "navbar.html" %}  <!--添加导航栏-->
+{% endblock %}
+
+{% block body_foot %}
+    <script src="/static/js/index.js"></script>
 {% endblock %}

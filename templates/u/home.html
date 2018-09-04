@@ -2,42 +2,6 @@
 
 {% block title %}{{ super() }} - {{ current_user.username }}{% endblock %}
 
-{% block head %}
-    {{ super() }}
-    <style>
-        .file {
-            padding: 4px 10px;
-            {#height: 40px;#}
-            {#line-height: 40px;#}
-            position: relative;
-            cursor: pointer;
-            color: #888;
-            background: #fafafa;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            overflow: hidden;
-            display: inline-block;
-            *display: inline;
-            *zoom: 1;
-            margin-left: 2.3em;
-        }
-        .file input {
-            position: absolute;
-            font-size: 100px;
-            opacity: 0;
-            filter: alpha(opacity=0);
-            {#cursor: pointer#}
-         }
-        {#.file:hover {#}
-        {#    background: #AADFFD;#}
-        {#    border-color: #78C3F3;#}
-        {#    color: #004974;#}
-        {#    text-decoration: none;#}
-        {# }#}
-    </style>
-
-{% endblock %}
-
 {% block body %}
     {{ super() }}
 
@@ -55,13 +19,16 @@
                 <div class="modal-body">
                     <div class="container">
                     <form method="post" class="form-inline" enctype=multipart/form-data action="{{ url_for("u.home") }}">
-                        <ul><input type="text" class="form-control" placeholder="标题" name="title" required="required"></ul>
-                        <ul><input type="text" class="form-control" placeholder="简介" name="about" required="required"></ul>
-                        <ul><input type="text" class="form-control" placeholder="分类" name="classification" required="required"></ul>
+                        <ul><input type="text" class="form-control" placeholder="标题"
+                                   name="title" required="required" maxlength="127"></ul>
+                        <ul><input type="text" class="form-control" placeholder="简介"
+                                   name="about" required="required" maxlength="1023"></ul>
+                        <ul><input type="text" class="form-control" placeholder="分类"
+                                   name="classification" required="required" maxlength="31"></ul>
                         <ul></ul>
-                        <div class="form-inline">
-                            <span class="btn-outline-primary file">
-                                <input type="file" name=file id="fileUpload" value="value" accept=".md, .jpg, .jpeg, .png" required="required">
+                        <div class="form-inline" style="margin-left: 2.3em">
+                            <span class="btn-outline-primary file-style">
+                                <input type="file" name=file id="fileUpload" value="value" accept=".md" required="required">
                                 <span id="showFileName">选择文件</span>  <!-- 展示文件名 -->
                             </span>
                             <input class="btn btn-outline-info" type=submit value=Upload style="margin-left: 3em">
@@ -97,7 +64,11 @@
                     </div>
                 </div>
             </div>
-            <div class="card-body">{{ info['signature'] }}</div>
+            <div class="card-body">
+
+                <p class="d-sm-inline">{{ info['signature'] }}</p>
+                <a href="{{ url_for('u.profile') }}"><img src="/static/image/set-l.png" align="right"></a>
+            </div>
         </div>
     </div>
 
@@ -107,7 +78,7 @@
 
             <div class="container" style="margin-top: 2.5em" id="div_{{ article.id }}">
 	            <div class="card-header" style="background-color: #d7ff8d; color: #2c2425;">
-                    <div class="row" style="height: 50px;">
+                    <div class="row">
                         <a class="mr-auto" href="{{ url_for('index.reading', article_id=article.id) }}"
                             style="text-decoration: none">
                             <ul class="mt-2 mt-lg-0">
@@ -157,18 +128,6 @@
     </div>
 
 <script>
-    {# 用来进行文件上传的一些验证处理及UI变化 #}
-    $(".file").on("change","input[type='file']",function(){
-        var filePath=$(this).val();
-        if(filePath.length < 3)  {# 未选择文件时 #}
-            $("#showFileName").text("选择文件");
-        else {
-            var arr = filePath.split('\\');
-            var fileName = arr[arr.length - 1];
-            $("#showFileName").text(" " + fileName + " ");
-        }
-    });
-
     {# 删除文章 #}
     $('#show_all_articles').delegate('button[data-target]', 'click', function() {
         var target = $(this).data('target');

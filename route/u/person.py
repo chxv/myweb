@@ -2,7 +2,6 @@ from flask import Blueprint, redirect, render_template, url_for, flash, request,
 from flask_login import login_required, current_user
 # from werkzeug.utils import secure_filename
 # import os
-# from app import app
 
 mod = Blueprint('u', __name__, url_prefix='/u')
 
@@ -23,7 +22,7 @@ def home():
         if file.filename == '':
             flash('No selected file')
             return redirect(request.url)
-        if not allowed_file(file.filename):
+        if not allowed_file(file.filename, 'Article'):
             flash('File type error!')
             return redirect(request.url)
         if file:
@@ -32,7 +31,7 @@ def home():
             import random
             import datetime
             filename = str(random.randrange(0, 1024, 1)) + datetime.datetime.now().strftime('-%y%m%d%H%M%S%f') + \
-                       '.' + file.filename.rsplit('.', 1)[1]  # 确保文件安全以及避免同名文件
+                '.' + file.filename.rsplit('.', 1)[1]  # 确保文件安全以及避免同名文件
             upload_folder = f'static/u/{current_user.id}/'   # static/u/<user_id>/filename
             file.save(upload_folder + filename)
             # 保存文件信息到数据库
@@ -61,6 +60,46 @@ def home():
     # 用户文件夹 /static/u/<user_id>/
     return render_template('u/home.html', info=info)
 
+
+@mod.route('/profile', methods=['GET', 'POST'])
+@login_required
+def profile():
+    from ...models import User
+    from ...func import allowed_file, modify_user_config
+    if request.method == 'POST':
+        # 用户上传个人信息
+        # 若包含文件
+        if 'file' in request.files:
+            file = request.files['file']  # 文件
+            if file.filename == '':
+                flash('No selected file')
+                return redirect(request.url)
+            if not allowed_file(file.filename, 'Image'):
+                flash('File type error!')
+                return redirect(request.url)
+            if file:
+                # 保存文件，更改头像
+                import random
+                import datetime
+                filename = str(random.randrange(0, 1024, 1)) + datetime.datetime.now().strftime('-%y%m%d%H%M%S%f') + \
+                    '.' + file.filename.rsplit('.', 1)[1]  # 确保文件安全以及避免同名文件
+                upload_folder = f'static/u/{current_user.id}/'  # static/u/<user_id>/filename
+                file.save(upload_folder + filename)
+                modify_user_config(current_user, head_portrait=filename)  # 修改用户配置信息
+        nickname = request.form['nickname'].strip()
+        signature = request.form['signature'].strip()
+        new_nickname = nickname if nickname else current_user.nickname
+        new_signature = signature if signature else current_user.signature
+
+        from ... import db
+        u = User.query.filter_by(id=current_user.id).first()
+        u.nickname = new_nickname
+        u.signature = new_signature
+        db.session.commit()
+
+        return redirect(url_for('u.home'))
+
+    return render_template('u/profile.html')
 
 
 

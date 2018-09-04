@@ -1,0 +1,20 @@
+.file-style {
+    padding: 4px 10px;
+    position: relative;
+    cursor: pointer;
+    color: #888;
+    background: #fafafa;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    overflow: hidden;
+    display: inline-block;
+    *display: inline;
+    *zoom: 1;
+
+}
+.file-style input {
+    position: absolute;
+    font-size: 100px;
+    opacity: 0;
+    filter: alpha(opacity=0);
+ }
